@@ -1,0 +1,83 @@
+#include <Servo.h>
+
+const int motor1Pin = 41;
+const int motor2Pin = 40;
+
+// Servo disparo
+Servo servoDisparo;
+int anguloBase = 154;
+
+// Servo horizontal (izq-der)
+Servo servox;
+int angulobasex = 90;
+
+// Servo vertical (arriba-abajo)
+Servo servoy;
+int anguloBaseY = 60;
+
+void setup() {
+  Serial1.begin(9600);
+  
+  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(motor1Pin, OUTPUT);
+  pinMode(motor2Pin, OUTPUT);
+
+  servoDisparo.attach(4);
+  servoDisparo.write(anguloBase);
+
+  servox.attach(5);
+  servox.write(angulobasex);
+
+  servoy.attach(3);
+  servoy.write(anguloBaseY);
+}
+
+void loop() {
+  if (Serial1.available()) {
+    String comando = Serial1.readStringUntil('\n');
+    comando.trim();
+
+    if (comando == "MOVE_LEFT") {
+      digitalWrite(LED_BUILTIN, LOW);
+      angulobasex -= 10;
+      if (angulobasex < 0) angulobasex = 0;
+      servox.write(angulobasex);
+    }
+
+    else if (comando == "MOVE_RIGHT") {
+      digitalWrite(LED_BUILTIN, LOW);
+      angulobasex += 10;
+      if (angulobasex > 180) angulobasex = 180;
+      servox.write(angulobasex);
+    }
+
+    else if (comando == "MOVE_UP") {
+      digitalWrite(LED_BUILTIN, HIGH);
+      anguloBaseY += 10;
+      if (anguloBaseY > 90) anguloBaseY = 90;
+      servoy.write(anguloBaseY);
+    }
+
+    else if (comando == "MOVE_DOWN") {
+      digitalWrite(LED_BUILTIN, HIGH);
+      anguloBaseY -= 10;
+      if (anguloBaseY < 30) anguloBaseY = 30;
+      servoy.write(anguloBaseY);
+    }
+
+    else if (comando == "FIRE") {
+      digitalWrite(motor1Pin, HIGH);
+      digitalWrite(motor2Pin, HIGH);
+      delay(1000);
+
+      servoDisparo.write(anguloBase -45);
+      delay(400); 
+      servoDisparo.write(anguloBase);
+
+      delay(1000);
+
+      digitalWrite(motor1Pin, LOW);
+      digitalWrite(motor2Pin, LOW);
+    }
+  }
+}
